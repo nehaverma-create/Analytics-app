@@ -1,21 +1,33 @@
 import React, { useState } from "react";
-import CustomSelect from "./components/CustomSelect";
+import CustomSelect from "./CustomSelect";
+
+const initialState = {
+  fromDate: "2026-05-25",
+  toDate: "2026-06-23",
+  device: "all",
+  browser: "chrome",
+  country: "all",
+  granularity: "daily",
+};
 
 const AnalyticsFilters = () => {
-  const [fromDate, setFromDate] = useState("2026-05-25");
-  const [toDate, setToDate] = useState("2026-06-23");
-  const [device, setDevice] = useState("all");
-  const [browser, setBrowser] = useState("chrome");
-  const [country, setCountry] = useState("all");
-  const [granularity, setGranularity] = useState("daily");
+  const [filters, setFilters] = useState(initialState);
+
+  const handleReset = () => {
+    setFilters(initialState);
+  };
+
+  const handleChange = (key, value) => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
 
   return (
     <div className="filters-container">
-
-      {/* Heading */}
       <h3 className="filters-heading">Filters</h3>
 
-      {/* Filters Grid */}
       <div className="filters-grid">
 
         {/* FROM DATE */}
@@ -23,8 +35,10 @@ const AnalyticsFilters = () => {
           <label className="filter-label">From</label>
           <input
             type="date"
-            value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
+            value={filters.fromDate}
+            onChange={(e) =>
+              handleChange("fromDate", e.target.value)
+            }
             className="filter-input"
           />
         </div>
@@ -34,8 +48,10 @@ const AnalyticsFilters = () => {
           <label className="filter-label">To</label>
           <input
             type="date"
-            value={toDate}
-            onChange={(e) => setToDate(e.target.value)}
+            value={filters.toDate}
+            onChange={(e) =>
+              handleChange("toDate", e.target.value)
+            }
             className="filter-input"
           />
         </div>
@@ -43,8 +59,10 @@ const AnalyticsFilters = () => {
         {/* DEVICE */}
         <CustomSelect
           label="Device"
-          value={device}
-          onValueChange={setDevice}
+          value={filters.device}
+          onValueChange={(val) =>
+            handleChange("device", val)
+          }
           options={[
             { value: "all", label: "All devices" },
             { value: "desktop", label: "Desktop" },
@@ -55,8 +73,10 @@ const AnalyticsFilters = () => {
         {/* BROWSER */}
         <CustomSelect
           label="Browser"
-          value={browser}
-          onValueChange={setBrowser}
+          value={filters.browser}
+          onValueChange={(val) =>
+            handleChange("browser", val)
+          }
           options={[
             { value: "chrome", label: "Chrome" },
             { value: "safari", label: "Safari" },
@@ -67,8 +87,10 @@ const AnalyticsFilters = () => {
         {/* COUNTRY */}
         <CustomSelect
           label="Country"
-          value={country}
-          onValueChange={setCountry}
+          value={filters.country}
+          onValueChange={(val) =>
+            handleChange("country", val)
+          }
           options={[
             { value: "all", label: "All countries" },
             { value: "us", label: "United States" },
@@ -78,21 +100,24 @@ const AnalyticsFilters = () => {
         {/* GRANULARITY */}
         <CustomSelect
           label="Granularity"
-          value={granularity}
-          onValueChange={setGranularity}
+          value={filters.granularity}
+          onValueChange={(val) =>
+            handleChange("granularity", val)
+          }
           options={[
             { value: "daily", label: "Daily" },
             { value: "weekly", label: "Weekly" },
           ]}
         />
-
       </div>
 
       {/* RESET BUTTON */}
-      <button className="reset-button">
+      <button
+        className="reset-button"
+        onClick={handleReset}
+      >
         Reset filters
       </button>
-
     </div>
   );
 };

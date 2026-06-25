@@ -4,8 +4,7 @@ import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Analytics from "./pages/analytics";
-
-import "./styles.css";
+import"./styles.css";
 function AppRoutes() {
   return (
     <Routes>
@@ -27,7 +26,10 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      <Route path="/analytics/:name" element={<Analytics />} />
+      <Route path="/analytics/:name" element={         
+         <ProtectedRoute>
+<Analytics />
+ </ProtectedRoute>} />
     </Routes>
   );
 }

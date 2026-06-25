@@ -1,46 +1,20 @@
-import {
-  Activity,
-  BarChart3,
-  DollarSign,
-  LayoutGrid,
-} from "lucide-react";
-import logo from "../assets/logo.png";
 import GetStarted from "../components/GetStarted";
-
-const features = [
-  {
-    icon: Activity,
-    title: "Real-Time Tracking",
-    desc: "Monitor active visitors and page views as they happen in real-time",
-  },
-  {
-    icon: BarChart3,
-    title: "Detailed Reports",
-    desc: "Comprehensive analytics with visitor counts, sessions, and page views",
-  },
-  {
-    icon: DollarSign,
-    title: "Advanced Filters",
-    desc: "Filter by device type, browser, country, and time ranges",
-  },
-  {
-    icon: LayoutGrid,
-    title: "Time Series Data",
-    desc: "Visualize trends with daily, weekly, and monthly analytics charts",
-  },
-];
-
+import logo from "../assets/logo.png";
+import track from "../assets/track.png";
+import svg2 from "../assets/svg2.png";
+import svg3 from "../assets/svg3.png";
+import svg4 from "../assets/svg4.png";
 const Home = () => {
   return (
     <div className="home-container">
-
-      {/* header */}
+      {/* Header */}
       <header className="home-header">
         <div className="home-nav">
           <div className="home-logoBox">
-            <img src={logo} className="home-logoIcon" />
+            <img src={logo}  className="home-logoIcon" />
+
             <span className="home-logoText">
-              <h2 style={{ fontWeight: 500 }}>Track Analytics</h2>
+              <p>Track Analytics</p>
             </span>
           </div>
 
@@ -48,22 +22,23 @@ const Home = () => {
         </div>
       </header>
 
-      {/* //hero */}
-      <section
-        className="home-hero">
+      {/* Hero */}
+      <section className="home-hero">
         <h1 className="home-heroTitle">
-          Powerful Analytics for{" "}<br/>
+          Powerful Analytics for <br />
           <span className="home-gradientText">Your Websites</span>
         </h1>
 
         <p className="home-heroDesc">
-          Track visitor behavior, understand user journeys, and make data-driven decisions. Real-time analytics that help you grow your business.
+          Track visitor behavior, understand user journeys, and make
+          data-driven decisions. Real-time analytics that help you grow your
+          business.
         </p>
 
         <GetStarted />
       </section>
 
-     {/* //Features */}
+      {/* Features */}
       <section className="home-featuresSection">
         <h2 className="home-sectionTitle">
           Everything you need to understand your audience
@@ -73,61 +48,96 @@ const Home = () => {
           Comprehensive analytics features designed for modern websites
         </p>
 
-        <div className="home-featuresGrid">
-          {features.map((feature) => {
-            const Icon = feature.icon;
+        <div className="features-grid">
+          <div className="feature-card">
+            <div className="icon">
+          <img src={track}/></div>
+            <h3 className="feature-title">Real-Time Tracking</h3>
 
-            return (
-              <div className="home-card" key={feature.title}>
-                <div className="home-cardIcon">
-                  <Icon size={28} />
-                </div>
+            <p className="feature-desc">
+              Monitor active visitors and page views as they happen in
+              real-time
+            </p>
+          </div>
 
-                <h3 className="home-cardTitle">{feature.title}</h3>
-                <p className="home-cardDesc">{feature.desc}</p>
-              </div>
-            );
-          })}
+          <div className="feature-card">
+            <div className="icon">
+            <img src={svg2}/></div>
+            <h3 className="feature-title">Detailed Reports</h3>
+
+            <p className="feature-desc">
+              Comprehensive analytics with visitor counts, sessions, and page
+              views
+            </p>
+          </div>
+
+          <div className="feature-card">
+            <div className="icon">
+            <img src={svg3}/></div>
+            <h3 className="feature-title">Advanced Filters</h3>
+
+            <p className="feature-desc">
+              Filter by device type, browser, country, and time ranges
+            </p>
+          </div>
+
+          <div className="feature-card">
+            <div className="icon">
+            <img src={svg4}/></div>
+            <h3 className="feature-title">Time Series Data</h3>
+
+            <p className="feature-desc">
+              Visualize trends with daily, weekly, and monthly analytics charts
+            </p>
+          </div>
         </div>
       </section>
 
-     {/* //Steps */}
+      {/* Steps */}
       <section className="home-stepsSection">
         <div className="home-stepsBox">
           <h2 className="home-sectionTitle">
             Simple setup, powerful insights
           </h2>
 
-          <p className="home-sectionSubtitle"> 
-            Get started in minutes. Add our lightweight tracking script to your website and start collecting valuable analytics data immediately.
-             </p>
+          <p className="home-sectionSubtitle">
+            Get started in minutes. Add our lightweight tracking script to your
+            website and start collecting valuable analytics data immediately.
+          </p>
 
-          <div className="home-stepsGrid"> 
-            <div className="home-stepItem"> 
+          <div className="home-stepsGrid">
+            <div className="home-stepItem">
               <div className="home-stepNumber">1</div>
-               <h3 className="home-stepTitle">Create Account</h3> 
-               <p className="home-stepDesc"> 
-                Sign up for free and create your first website project 
-                </p> 
-               </div>
 
-           <div className="home-stepItem"> 
-            <div className="home-stepNumber">2</div>
-             <h3 className="home-stepTitle">Add Tracking Code</h3> 
-             <p className="home-stepDesc"> 
-              Copy and paste our tracking script into your website 
+              <h3 className="home-stepTitle">Create Account</h3>
+
+              <p className="home-stepDesc">
+                Sign up for free and create your first website project
               </p>
             </div>
 
-           <div className="home-stepItem"> 
-            <div className="home-stepNumber">3</div> 
-            <h3 className="home-stepTitle">View Analytics</h3>
-             <p className="home-stepDesc"> Start tracking visitors and analyzing your website performance </p> 
-             </div>
+            <div className="home-stepItem">
+              <div className="home-stepNumber">2</div>
+
+              <h3 className="home-stepTitle">Add Tracking Code</h3>
+
+              <p className="home-stepDesc">
+                Copy and paste our tracking script into your website
+              </p>
+            </div>
+
+            <div className="home-stepItem">
+              <div className="home-stepNumber">3</div>
+
+              <h3 className="home-stepTitle">View Analytics</h3>
+
+              <p className="home-stepDesc">
+                Start tracking visitors and analyzing your website performance
+              </p>
+            </div>
           </div>
         </div>
       </section>
-
     </div>
   );
 };

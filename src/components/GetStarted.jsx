@@ -41,7 +41,7 @@ const GetStarted = ({ variant = "button", isShowProfile = false }) => {
               onClick={() => navigate("/dashboard")}
             >
               <span className="home-divider"></span>
-              <span>Go To Dashboard</span>
+              <span>Go to Dashboard</span>
             </div>
 
             {isShowProfile && <UserButton />}
@@ -51,7 +51,7 @@ const GetStarted = ({ variant = "button", isShowProfile = false }) => {
             className="home-ctaButton"
             onClick={() => navigate("/dashboard")}
           >
-            Go To Dashboard
+            Go to Dashboard
             <ChevronRight size={18} />
           </button>
         )}

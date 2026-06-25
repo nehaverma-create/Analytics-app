@@ -1,85 +1,63 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserButton } from "@clerk/clerk-react";
+import { useDispatch, useSelector } from "react-redux";
 import AddWebsiteModal from "../components/AddWebsiteModal";
+import {
+  addWebsite,
+  updateWebsite,
+  deleteWebsite,
+} from "../store/websitesSlice";
 
 const ManageWebsites = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const websites = useSelector((state) => state.websites.websites);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [websites, setWebsites] = useState([]);
-  const [editingIndex, setEditingIndex] = useState(null);
+  const [editingId, setEditingId] = useState(null);
   const [copiedIndex, setCopiedIndex] = useState(null);
 
-  // Load websites from localStorage
-  useEffect(() => {
-    const saved =
-      JSON.parse(localStorage.getItem("websites")) || [];
-    setWebsites(saved);
-  }, []);
-
-  // Add / Update website
   const handleSaveWebsite = (websiteData) => {
-    const existing =
-      JSON.parse(localStorage.getItem("websites")) || [];
-
-    let updatedWebsites;
-
-    if (editingIndex !== null) {
-      updatedWebsites = [...existing];
-
-      updatedWebsites[editingIndex] = {                                          //edit
-        ...updatedWebsites[editingIndex],
-        websiteName: websiteData.websiteName,
-        domain: websiteData.domain,
-      };
-    } else {
-      updatedWebsites = [
-        ...existing,
-        {                                                                         //add
+    if (editingId !== null) {
+      dispatch(
+        updateWebsite({
+          id: editingId,
           websiteName: websiteData.websiteName,
           domain: websiteData.domain,
-          createdAt: new Date().toLocaleDateString(),
-          trackingScript: "Hello World",
-        },
-      ];
+        })
+      );
+    } else {
+      dispatch(addWebsite(websiteData));
     }
 
-    localStorage.setItem(
-      "websites",
-      JSON.stringify(updatedWebsites)
-    );
-
-    setWebsites(updatedWebsites);
-    setEditingIndex(null);
+    setEditingId(null);
     setIsModalOpen(false);
   };
 
-  // Delete website
- const handleDeleteWebsite = (indexToDelete) => {
-  const updated = websites.filter((site, index) => 
-    index !== indexToDelete);
+  const handleDeleteWebsite = (id) => {
+    dispatch(deleteWebsite(id));
+  };
 
-  setWebsites(updated);
-  localStorage.setItem("websites", JSON.stringify(updated));
-};
-
-  // Edit website
-  const handleEditWebsite = (index) => {
-    setEditingIndex(index);
+  const handleEditWebsite = (id) => {
+    setEditingId(id);
     setIsModalOpen(true);
   };
 
-  console.log('***websites', websites)
   const handleCopy = async (text, index) => {
     try {
       await navigator.clipboard.writeText(text);
       setCopiedIndex(index);
-
-    } catch (err) {
+    } catch {
       alert("Failed to copy!");
     }
   };
+
+  const editingWebsite =
+    editingId !== null
+      ? websites.find((site) => site.id === editingId)
+      : null;
+
   return (
     <div className="manage-container">
       {/* HEADER */}
@@ -90,17 +68,14 @@ const ManageWebsites = () => {
         </div>
 
         <div className="header-right">
-          <div
-            className="back-link"
-            onClick={() => navigate("/dashboard")}
-          >
+          <div className="back-link" onClick={() => navigate("/dashboard")}>
             ← Back to Dashboard
           </div>
 
           <button
             className="add-btn"
             onClick={() => {
-              setEditingIndex(null);
+              setEditingId(null);
               setIsModalOpen(true);
             }}
           >
@@ -113,19 +88,18 @@ const ManageWebsites = () => {
 
       {/* LIST */}
       <div className="website-list">
+      
         {websites.length === 0 ? (
           <center>No websites added yet.</center>
         ) : (
           websites.map((site, index) => (
-            <div key={index} className="website-card">
+            <div key={site.id} className="website-card">
               {/* TOP SECTION */}
               <div className="website-top">
                 <div className="website-info">
                   <h3>{site.websiteName}</h3>
 
-                  <div className="website-domain">
-                    {site.domain}
-                  </div>
+                  <div className="website-domain">{site.domain}</div>
 
                   <div className="website-date">
                     Created {site.createdAt}
@@ -144,18 +118,14 @@ const ManageWebsites = () => {
 
                   <button
                     className="action-btn"
-                    onClick={() =>
-                      handleEditWebsite(index)
-                    }
+                    onClick={() => handleEditWebsite(site.id)}
                   >
                     Edit
                   </button>
 
                   <button
                     className="action-btn delete"
-                    onClick={() =>
-                      handleDeleteWebsite(index)
-                    }
+                    onClick={() => handleDeleteWebsite(site.id)}
                   >
                     Delete
                   </button>
@@ -169,18 +139,13 @@ const ManageWebsites = () => {
 
                   <button
                     className="copy-btn"
-                    onClick={() =>
-                      handleCopy(site.trackingScript, index)
-                    }
+                    onClick={() => handleCopy(site.trackingScript, index)}
                   >
                     {copiedIndex === index ? "Copied!" : "Copy"}
                   </button>
                 </div>
 
-                <textarea
-                  readOnly
-                  value={site.trackingScript}
-                />
+                <textarea readOnly value={site.trackingScript} />
               </div>
             </div>
           ))
@@ -192,14 +157,10 @@ const ManageWebsites = () => {
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
-          setEditingIndex(null);
+          setEditingId(null);
         }}
         onAddWebsite={handleSaveWebsite}
-        websiteData={
-          editingIndex !== null
-            ? websites[editingIndex]
-            : null
-        }
+        websiteData={editingWebsite}
       />
     </div>
   );
