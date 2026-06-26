@@ -111,7 +111,7 @@ const Dashboard = () => {
                     <button
                       className="view-btn"
                       onClick={() =>
-                        navigate(`/analytics/${web.websiteName}`)
+                       navigate(`/analytics/${web.id}`)
                       }
                     >
                       View Analytics

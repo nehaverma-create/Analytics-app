@@ -1,107 +1,66 @@
+import React, { useMemo } from "react";
 import {
-  ResponsiveContainer,
   LineChart,
   Line,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
-  Legend,
+  ResponsiveContainer,
+  CartesianGrid,
 } from "recharts";
 
-const data = [
-  { date: "May 26", "Page views": 0, Visitors: 0, Sessions: 0 },
-  { date: "May 27", "Page views": 0, Visitors: 0, Sessions: 0 },
-  { date: "May 28", "Page views": 0, Visitors: 0, Sessions: 0 },
-  { date: "May 29", "Page views": 0, Visitors: 0, Sessions: 0 },
-  { date: "May 30", "Page views": 0, Visitors: 0, Sessions: 0 },
-  { date: "Jun 01", "Page views": 0, Visitors: 0, Sessions: 0 },
-  { date: "Jun 03", "Page views": 0, Visitors: 0, Sessions: 0 },
-  { date: "Jun 05", "Page views": 0, Visitors: 0, Sessions: 0 },
-  { date: "Jun 07", "Page views": 0, Visitors: 0, Sessions: 0 },
-  { date: "Jun 09", "Page views": 0, Visitors: 0, Sessions: 0 },
-  { date: "Jun 11", "Page views": 0, Visitors: 0, Sessions: 0 },
-  { date: "Jun 12", "Page views": 0, Visitors: 0, Sessions: 0 },
-  { date: "Jun 14", "Page views": 7, Visitors: 3, Sessions: 3 },
-  { date: "Jun 15", "Page views": 0, Visitors: 0, Sessions: 0 },
-  { date: "Jun 16", "Page views": 0, Visitors: 0, Sessions: 0 },
-  { date: "Jun 18", "Page views": 0, Visitors: 0, Sessions: 0 },
-  { date: "Jun 20", "Page views": 0, Visitors: 0, Sessions: 0 },
-  { date: "Jun 22", "Page views": 2, Visitors: 1, Sessions: 1 },
-  { date: "Jun 24", "Page views": 0, Visitors: 0, Sessions: 0 },
-];
+const TrafficChart = ({ data = [] }) => {
+  // Convert raw events → chart format
+  const chartData = useMemo(() => {
+    if (!Array.isArray(data)) return [];
 
-export default function TrafficChart() {
+    const grouped = {};
+
+    data.forEach((event) => {
+      if (!event?.createdAt) return;
+
+      const date = new Date(event.createdAt)
+        .toISOString()
+        .split("T")[0];
+
+      if (!grouped[date]) {
+        grouped[date] = 0;
+      }
+
+      grouped[date] += 1;
+    });
+
+    return Object.keys(grouped)
+      .sort()
+      .map((date) => ({
+        date,
+        visits: grouped[date],
+      }));
+  }, [data]);
+
   return (
-   <div className="traffic-card">
-  <h3 className="traffic-chart-title">Traffic over time</h3>
+    <div style={{ width: "100%", height: 320 }}>
+      <ResponsiveContainer>
+        <LineChart data={chartData}>
+          <CartesianGrid strokeDasharray="3 3" />
 
-  <ResponsiveContainer width="100%" height={350}>
-    <LineChart data={data}>
-      <CartesianGrid
-        vertical={false}
-        stroke="#e5e7eb"
-      />
+          <XAxis dataKey="date" />
 
-      <XAxis
-        dataKey="date"
-        axisLine={false}
-        tickLine={false}
-      />
+          <YAxis />
 
-      <YAxis
-        axisLine={false}
-        tickLine={false}
-      />
+          <Tooltip />
 
-      <Tooltip />
-
-          <Legend
-            verticalAlign="bottom"
-            align="center"
-            iconType="square"
-            iconSize={6}
-            wrapperStyle={{
-              fontSize: "11px",
-              lineHeight: "12px",
-              paddingTop: "8px",
-            }}
-            formatter={(value) => (
-    <span
-      style={{
-        fontSize: "12px",
-        color: "black",
-      }}
-    >
-      {value}
-    </span>
-  )}
+          <Line
+            type="monotone"
+            dataKey="visits"
+            stroke="#4F46E5"
+            strokeWidth={3}
+            dot={false}
           />
-
-      <Line
-        type="monotone"
-        dataKey="Page views"
-        stroke="#3b82f6"
-        strokeWidth={2}
-        dot={{ r: 2 }}
-      />
-       <Line
-        type="monotone"
-        dataKey="Visitors"
-        stroke="#10b981"
-        strokeWidth={2}
-        dot={{ r: 2 }}
-      />
-      <Line
-        type="monotone"
-        dataKey="Sessions"
-        stroke="#8b5cf6"
-        strokeWidth={2}
-        dot={{ r: 2 }}
-      />
-      
-    </LineChart>
-  </ResponsiveContainer>
-</div>
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   );
-}
+};
+
+export default TrafficChart;

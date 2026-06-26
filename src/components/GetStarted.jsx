@@ -12,14 +12,11 @@ const GetStarted = ({ variant = "button", isShowProfile = false }) => {
 
   return (
     <div>
+     
       <SignedOut>
-        <SignUpButton
-          mode="modal"
-          forceRedirectUrl="/dashboard"
-        >
+        <SignUpButton mode="modal" forceRedirectUrl="/dashboard">
           {variant === "link" ? (
-            <div
-              className="home-navLink">          
+            <div className="home-navLink">
               <span className="home-divider"></span>
               <UserRound size={18} />
               <span>Get Started</span>
@@ -33,6 +30,7 @@ const GetStarted = ({ variant = "button", isShowProfile = false }) => {
         </SignUpButton>
       </SignedOut>
 
+    
       <SignedIn>
         {variant === "link" ? (
           <div className="home-userSection">
@@ -44,6 +42,7 @@ const GetStarted = ({ variant = "button", isShowProfile = false }) => {
               <span>Go to Dashboard</span>
             </div>
 
+            {/* Clerk default modal includes signOut */}
             {isShowProfile && <UserButton />}
           </div>
         ) : (
