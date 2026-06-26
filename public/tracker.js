@@ -126,5 +126,3 @@
 
   sendEvent(payload);
 })();
-
-window.generateId = generateId;

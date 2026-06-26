@@ -109,9 +109,7 @@ const ManageWebsites = () => {
                 <div className="website-actions">
                   <button
                     className="action-btn"
-                    onClick={() =>
-                      navigate(`/analytics/${site.websiteName}`)
-                    }
+                    onClick={() => navigate(`/analytics/${site.id}`)}
                   >
                     View Analytics
                   </button>

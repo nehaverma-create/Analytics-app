@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
@@ -16,52 +16,61 @@ const Analytics = () => {
   const navigate = useNavigate();
 
   const websites = useSelector((state) => state.websites.websites);
-
-  const website = websites.find((w) => w.id === id);
-
-  if (!website) {
-    return <h2>Website not found.</h2>;
-  }
-
-  const trackingId = website.trackingId;
+  const website = websites.find((w) => w.id === id || w.websiteName === id);
 
   const [analytics, setAnalytics] = useState({
     events: [],
     totalVisitors: 0,
     pageViews: 0,
     sessions: 0,
+    activeUsers: 0,
   });
 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!trackingId) return;
+    if (!id) return;
 
-    setLoading(true);
+    const fetchAnalytics = async () => {
+      try {
+        const [overviewRes, activeRes] = await Promise.all([
+          fetch(`/api/analytics/overview?websiteId=${id}&days=30`),
+          fetch(`/api/analytics/active?websiteId=${id}&minutes=5`),
+        ]);
 
-    fetch(`https://analytics.utkarsh.app/api/analytics/${trackingId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("API DATA:", data);
+        if (!overviewRes.ok) {
+          throw new Error("Failed to fetch analytics overview");
+        }
+
+        const overview = await overviewRes.json();
+        const active = activeRes.ok ? await activeRes.json() : { activeUsers: 0 };
 
         setAnalytics({
-          events: data.events || [],
-          totalVisitors: data.totalVisitors || 0,
-          pageViews: data.pageViews || 0,
-          sessions: data.sessions || 0,
+          events: overview.events || [],
+          totalVisitors: overview.totalVisitors || 0,
+          pageViews: overview.pageViews || 0,
+          sessions: overview.sessions || 0,
+          activeUsers: active.activeUsers || 0,
         });
-
-        setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Error fetching analytics:", err);
+      } finally {
         setLoading(false);
-      });
-  }, [trackingId]);
+      }
+    };
+
+    fetchAnalytics();
+
+    const interval = setInterval(fetchAnalytics, 30000);
+    return () => clearInterval(interval);
+  }, [id]);
+
+  if (!website) {
+    return <h2>Website not found.</h2>;
+  }
 
   return (
     <div>
-      {/* Header */}
       <div className="analytics-header">
         <div className="analytics-title">
           <h2>Analytics</h2>
@@ -78,7 +87,6 @@ const Analytics = () => {
 
       <AnalyticsFilters />
 
-      {/* Stats */}
       <div className="analytic-grid">
         <div className="analytics-card stat-card">
           <p>Total Visitors</p>
@@ -97,11 +105,11 @@ const Analytics = () => {
 
         <div className="analytics-card stat-card">
           <p>Active Users</p>
-          <h3>{loading ? "..." : 0}</h3>
+          <h3>{loading ? "..." : analytics.activeUsers}</h3>
+          <p>Last 5 minutes</p>
         </div>
       </div>
 
-      {/* Charts */}
       <div className="analytics-content">
         <TrafficChart data={analytics.events} />
 

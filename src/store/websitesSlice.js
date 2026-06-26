@@ -1,7 +1,23 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+const APP_URL =
+  import.meta.env.VITE_APP_URL ||
+  (import.meta.env.DEV
+    ? "http://localhost:5173"
+    : "https://analytics-app-kappa.vercel.app");
+
+const API_BASE =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV ? "http://localhost:3001" : APP_URL);
+
+const buildTrackingScript = (trackingId) =>
+  `<script
+  src="${APP_URL.replace(/\/$/, "")}/tracker.js"
+  data-tracking-id="${trackingId}"
+  data-endpoint="${API_BASE.replace(/\/$/, "")}/api/track"
+  async></script>`;
+
 const generateTrackingId = () => {
-  // 32-character unique ID
   return crypto.randomUUID().replace(/-/g, "");
 };
 
@@ -14,20 +30,18 @@ const websitesSlice = createSlice({
   initialState,
   reducers: {
     addWebsite: (state, action) => {
-      const trackingId = generateTrackingId();
+      const trackingId = action.payload.trackingId ?? generateTrackingId();
 
       state.websites.push({
-        id: crypto.randomUUID(),
+        id: action.payload.id ?? crypto.randomUUID(),
         websiteName: action.payload.websiteName,
         domain: action.payload.domain,
         createdAt:
           action.payload.createdAt ?? new Date().toLocaleDateString(),
         trackingId,
-        trackingScript: `<script
-  src="https://analytics.utkarsh.app/tracker.js"
-  data-tracking-id="${trackingId}"
-  data-endpoint="http://localhost:3000/api/track"
-  async></script>`,
+        trackingScript:
+          action.payload.trackingScript ??
+          buildTrackingScript(trackingId),
       });
     },
 
