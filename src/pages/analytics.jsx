@@ -135,69 +135,76 @@ const Analytics = () => {
   }
 
   return (
-    <div>
-      <div className="analytics-header">
-        <div className="analytics-title">
-          <h2>Analytics</h2>
-          <p>{website.domain || website.websiteName}</p>
-        </div>
-
-        <div
-          className="analytics-link"
-          onClick={() => navigate("/manage-websites")}
-        >
-          ← Back to websites
-        </div>
-      </div>
-
-      <AnalyticsFilters
-        filters={filters}
-        onChange={setFilters}
-        options={filterOptions}
-      />
-
-      <div className="analytic-grid">
-        <div className="analytics-card stat-card">
-          <p>Total visitors</p>
-          <h3>{loading ? "..." : stats.totalVisitors}</h3>
-        </div>
-
-        <div className="analytics-card stat-card">
-          <p>Page views</p>
-          <h3>{loading ? "..." : stats.pageViews}</h3>
-        </div>
-
-        <div className="analytics-card stat-card">
-          <p>Sessions</p>
-          <h3>{loading ? "..." : stats.sessions}</h3>
-        </div>
-
-        <div className="analytics-card stat-card">
-          <div className="stat-card-header">
-            <p>Active users</p>
-            <span className="live-badge">Live</span>
-          </div>
-          <h3>{loading ? "..." : activeUsers}</h3>
-          {lastUpdated && (
-            <p className="stat-updated">
-              Updated {lastUpdated.toLocaleTimeString()}
+    <div className="app-page">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <div className="app-page-title">
+            <h2>Analytics</h2>
+            <p>
+              {website.websiteName} · {website.domain || website.websiteName}
             </p>
-          )}
-        </div>
-      </div>
+          </div>
 
-      <div className="analytics-content">
-        <TrafficChart data={trafficData} />
-
-        <div className="analytics-chart-grids">
-          <DeviceTypesChart data={deviceData} />
-          <TopBrowsersChart data={browserData} />
-          <TopCountriesChart data={countryData} />
-          <OperatingSystemsChart data={osData} />
-          <TopPages data={pageData} />
-          <TrafficSources data={sourceData} />
+          <a
+            type="button"
+            className="app-back-link"
+            onClick={() => navigate("/manage-websites")}
+          >
+            ← Back to websites
+          </a>
         </div>
-      </div>
+      </header>
+
+      <main className="app-main">
+        <AnalyticsFilters
+          filters={filters}
+          onChange={setFilters}
+          options={filterOptions}
+        />
+
+        <div className="analytic-grid">
+          <div className="analytics-card stat-card">
+            <p>Total visitors</p>
+            <h3>{loading ? "..." : stats.totalVisitors}</h3>
+          </div>
+
+          <div className="analytics-card stat-card">
+            <p>Page views</p>
+            <h3>{loading ? "..." : stats.pageViews}</h3>
+          </div>
+
+          <div className="analytics-card stat-card">
+            <p>Sessions</p>
+            <h3>{loading ? "..." : stats.sessions}</h3>
+          </div>
+
+          <div className="analytics-card stat-card">
+            <div className="stat-card-header">
+              <p>Active users</p>
+              <span className="live-badge">Live</span>
+            </div>
+            <h3>{loading ? "..." : activeUsers}</h3>
+            {lastUpdated && (
+              <p className="stat-updated">
+                Updated {lastUpdated.toLocaleTimeString()}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="analytics-content">
+          <TrafficChart data={trafficData} />
+
+          <div className="analytics-chart-grids">
+            <DeviceTypesChart data={deviceData} />
+            <TopBrowsersChart data={browserData} />
+            <TopCountriesChart data={countryData} />
+            <OperatingSystemsChart data={osData} />
+            <TopPages data={pageData} />
+            <TrafficSources data={sourceData} />
+          </div>
+        </div>
+      </main>
     </div>
   );
 };

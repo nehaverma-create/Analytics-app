@@ -63,9 +63,11 @@ const Dashboard = () => {
   return (
     <>
       <div className="dashboard-container">
-        <header className="dashboard-header">
-          <h1>Dashboard</h1>
-          <UserButton />
+        <header className="dashboard-header app-header">
+          <div className="app-header-inner">
+            <h1>Dashboard</h1>
+            <UserButton />
+          </div>
         </header>
 
         <main className="dashboard-content">
@@ -118,7 +120,7 @@ const Dashboard = () => {
           </div>
 
           <div className="dashboard-card">
-            <h3>Your Websites</h3>
+            <h2>Your Websites</h2>
 
             <p className="sub-info-text">
               {websites.length

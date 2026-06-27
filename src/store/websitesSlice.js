@@ -8,16 +8,14 @@ const APP_URL =
 
 const API_BASE =
   import.meta.env.VITE_API_URL ||
-  (import.meta.env.DEV ? "http://localhost:3010" : APP_URL);
+  (import.meta.env.DEV ? "http://localhost:3011" : APP_URL);
 
 const buildTrackingScript = (trackingId) =>
   `<script
   src="${APP_URL.replace(/\/$/, "")}/tracker.js"
   data-tracking-id="${trackingId}"
   data-endpoint="${API_BASE.replace(/\/$/, "")}/api/track"
-  async
-  >
-  </script>`;
+  async></script>`;
 
 const generateTrackingId = () => {
   return crypto.randomUUID().replace(/-/g, "");

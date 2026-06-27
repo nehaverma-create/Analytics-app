@@ -80,41 +80,48 @@ const ManageWebsites = () => {
       : null;
 
   return (
-    <div className="manage-container">
-      {/* HEADER */}
-      <div className="manage-header">
-        <div>
-          <h1 className="heading">Websites</h1>
-          <p>Manage websites and tracking scripts.</p>
-        </div>
-
-        <div className="header-right">
-          <div className="back-link" onClick={() => navigate("/dashboard")}>
-            ← Back to Dashboard
+    <div className="app-page">
+      <header className="app-header">
+        <div className="app-header-inner manage-header-content">
+          <div className="app-page-title">
+            <h1>Websites</h1>
+            <p>Manage websites and tracking scripts.</p>
           </div>
 
-          <button
-            className="add-btn"
-            onClick={() => {
-              setEditingId(null);
-              setIsModalOpen(true);
-            }}
-          >
-            Add Website
-          </button>
+          <div className="manage-header-actions">
+            <button
+              type="button"
+              className="back-link"
+              onClick={() => navigate("/dashboard")}
+            >
+              ← Back to dashboard
+            </button>
 
-          <UserButton />
+            <button
+              type="button"
+              className="add-btn"
+              onClick={() => {
+                setEditingId(null);
+                setIsModalOpen(true);
+              }}
+            >
+              Add website
+            </button>
+
+            <UserButton />
+          </div>
         </div>
-      </div>
+      </header>
 
-      {/* LIST */}
-      <div className="website-list">
-      
-        {websites.length === 0 ? (
-          <center>No websites added yet.</center>
-        ) : (
-          websites.map((site, index) => (
-            <div key={site.id} className="website-card">
+      <main className="app-main">
+        <div className="manage-website-list">
+          {websites.length === 0 ? (
+            <div className="dashboard-card empty-state-center">
+              <p className="empty-text">No websites added yet.</p>
+            </div>
+          ) : (
+            websites.map((site, index) => (
+              <div key={site.id} className="website-card">
               {/* TOP SECTION */}
               <div className="website-top">
                 <div className="website-info">
@@ -167,9 +174,10 @@ const ManageWebsites = () => {
                 <textarea readOnly value={site.trackingScript} />
               </div>
             </div>
-          ))
-        )}
-      </div>
+            ))
+          )}
+        </div>
+      </main>
 
       {/* MODAL */}
       <AddWebsiteModal
