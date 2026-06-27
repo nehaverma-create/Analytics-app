@@ -15,7 +15,9 @@ const buildTrackingScript = (trackingId) =>
   src="${APP_URL.replace(/\/$/, "")}/tracker.js"
   data-tracking-id="${trackingId}"
   data-endpoint="${API_BASE.replace(/\/$/, "")}/api/track"
-  async></script>`;
+  async
+  >
+  </script>`;
 
 const generateTrackingId = () => {
   return crypto.randomUUID().replace(/-/g, "");
@@ -62,6 +64,10 @@ const websitesSlice = createSlice({
     resetWebsites: (state) => {
       state.websites = [];
     },
+
+    setWebsites: (state, action) => {
+      state.websites = action.payload;
+    },
   },
 });
 
@@ -70,6 +76,7 @@ export const {
   updateWebsite,
   deleteWebsite,
   resetWebsites,
+  setWebsites,
 } = websitesSlice.actions;
 
 export default websitesSlice.reducer;   

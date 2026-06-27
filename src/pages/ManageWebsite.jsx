@@ -8,11 +8,16 @@ import {
   updateWebsite,
   deleteWebsite,
 } from "../store/websitesSlice";
+import { useSyncWebsites } from "../hooks/useSyncWebsites";
+import { useAuthFetch } from "../hooks/useAuthFetch";
 
 const ManageWebsites = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const authFetch = useAuthFetch();
   const websites = useSelector((state) => state.websites.websites);
+
+  useSyncWebsites();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -22,7 +27,7 @@ const ManageWebsites = () => {
     if (editingId !== null) {
       dispatch(
         updateWebsite({
-          id: editingId,
+          id: websiteData.id ?? editingId,
           websiteName: websiteData.websiteName,
           domain: websiteData.domain,
         })
@@ -35,8 +40,24 @@ const ManageWebsites = () => {
     setIsModalOpen(false);
   };
 
-  const handleDeleteWebsite = (id) => {
-    dispatch(deleteWebsite(id));
+  const handleDeleteWebsite = async (id) => {
+    if (!window.confirm("Delete this website and all its analytics data?")) {
+      return;
+    }
+
+    try {
+      const response = await authFetch(`/api/websites/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete website");
+      }
+
+      dispatch(deleteWebsite(id));
+    } catch (err) {
+      alert(err.message || "Failed to delete website");
+    }
   };
 
   const handleEditWebsite = (id) => {

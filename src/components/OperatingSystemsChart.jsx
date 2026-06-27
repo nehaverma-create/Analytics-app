@@ -7,49 +7,36 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
+import ChartEmptyState from "./ChartEmptyState";
 
-const data = [
-  {
-    os: "Linux",
-    users: 9,
-  },
-];
+export default function OperatingSystemsChart({ data = [] }) {
+  const hasData = data.length > 0;
 
-export default function OperatingSystemsChart() {
   return (
     <div className="chart-card">
       <h3>Operating Systems</h3>
 
-      <ResponsiveContainer width="100%" height={250}>
-        <BarChart
-          data={data}
-          layout="vertical"
-        >
-          <CartesianGrid
-            horizontal={false}
-            vertical={true}
-            stroke="#f2f4f7"
-          />
-          <XAxis type="number"
-            axisLine={false}
-            tickLine={false} 
-          />
+      {!hasData ? (
+        <ChartEmptyState message="No OS data available" />
+      ) : (
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={data} layout="vertical">
+            <CartesianGrid
+              horizontal={false}
+              vertical={true}
+              stroke="#f2f4f7"
+            />
 
-          <YAxis
-            type="category"
-            dataKey="os"
-            axisLine={false}
-          />
+            <XAxis type="number" axisLine={false} tickLine={false} />
 
-          <Tooltip />
+            <YAxis type="category" dataKey="os" axisLine={false} width={80} />
 
-          <Bar
-            dataKey="users"
-            fill="#8B5CF6"
-            radius={[4, 4, 4, 4]}
-          />
-        </BarChart>
-      </ResponsiveContainer>
+            <Tooltip />
+
+            <Bar dataKey="users" fill="#8B5CF6" radius={[4, 4, 4, 4]} />
+          </BarChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 }

@@ -5,55 +5,43 @@ import {
   YAxis,
   ResponsiveContainer,
   Tooltip,
-  CartesianGrid
+  CartesianGrid,
 } from "recharts";
+import ChartEmptyState from "./ChartEmptyState";
 
-const data = [
-  {
-    country: "IN",
-    visitors: 7,
-  },
-  {
-    country: "US",
-    visitors: 2,
-  },
-];
+export default function TopCountriesChart({ data = [] }) {
+  const hasData = data.length > 0;
 
-export default function TopCountriesChart() {
   return (
     <div className="chart-card">
       <h3>Top Countries</h3>
 
-      <ResponsiveContainer width="100%" height={250}>
-        <BarChart
-          data={data}
-          layout="vertical"
-        >
-          <CartesianGrid
-            horizontal={false}
-            vertical={true}
-            stroke="#f2f4f7"
-          />
-          <XAxis type="number"
-          axisLine={false}
-          tickLine={false} 
-           />
+      {!hasData ? (
+        <ChartEmptyState message="No country data available" />
+      ) : (
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={data} layout="vertical">
+            <CartesianGrid
+              horizontal={false}
+              vertical={true}
+              stroke="#f2f4f7"
+            />
 
-          <YAxis
-            type="category"
-            dataKey="country"
-            axisLine={false}
-          />
+            <XAxis type="number" axisLine={false} tickLine={false} />
 
-          <Tooltip />
+            <YAxis
+              type="category"
+              dataKey="country"
+              axisLine={false}
+              width={40}
+            />
 
-          <Bar
-            dataKey="visitors"
-            fill="#10B981"
-            radius={[4, 4, 4, 4]}
-          />
-        </BarChart>
-      </ResponsiveContainer>
+            <Tooltip />
+
+            <Bar dataKey="visitors" fill="#10B981" radius={[4, 4, 4, 4]} />
+          </BarChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 }

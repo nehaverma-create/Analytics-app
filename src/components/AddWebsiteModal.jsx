@@ -1,5 +1,6 @@
 import "./AddWebsiteModal.css";
 import { useState, useEffect } from "react";
+import { useAuthFetch } from "../hooks/useAuthFetch";
 
 export default function AddWebsiteModal({
   isOpen,
@@ -11,6 +12,7 @@ export default function AddWebsiteModal({
   const [domain, setDomain] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const authFetch = useAuthFetch();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -41,22 +43,45 @@ export default function AddWebsiteModal({
     setError("");
 
     if (websiteData) {
-      onAddWebsite({
-        websiteName,
-        domain,
-      });
-      setWebsiteName("");
-      setDomain("");
-      onClose();
+      setIsSubmitting(true);
+
+      try {
+        const response = await authFetch(`/api/websites/${websiteData.id}`, {
+          method: "PUT",
+          body: JSON.stringify({ name: websiteName, domain }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to update website");
+        }
+
+        const data = await response.json();
+
+        onAddWebsite({
+          id: data.id,
+          websiteName: data.name,
+          domain: data.domain,
+          trackingId: data.trackingId,
+          trackingScript: data.trackingScript,
+          createdAt: new Date(data.createdAt).toLocaleDateString(),
+        });
+
+        setWebsiteName("");
+        setDomain("");
+        onClose();
+      } catch (err) {
+        setError(err.message || "Failed to update website. Please try again.");
+      } finally {
+        setIsSubmitting(false);
+      }
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/websites", {
+      const response = await authFetch("/api/websites", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: websiteName, domain }),
       });
 
@@ -140,7 +165,9 @@ export default function AddWebsiteModal({
               disabled={isSubmitting}
             >
               {isSubmitting
-                ? "Creating..."
+                ? websiteData
+                  ? "Saving..."
+                  : "Creating..."
                 : websiteData
                   ? "Save changes"
                   : "Create website"}
