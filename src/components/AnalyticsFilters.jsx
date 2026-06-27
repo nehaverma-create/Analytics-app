@@ -1,5 +1,6 @@
 import CustomSelect from "./CustomSelect";
 import { getDefaultFilters } from "../utils/analyticsData";
+import { formatCountryLabel } from "../../shared/country.js";
 
 const AnalyticsFilters = ({ filters, onChange, options = {} }) => {
   const { browsers = [], countries = [], devices = [] } = options;
@@ -27,7 +28,10 @@ const AnalyticsFilters = ({ filters, onChange, options = {} }) => {
 
   const countryOptions = [
     { value: "all", label: "All countries" },
-    ...countries.map((country) => ({ value: country, label: country })),
+    ...countries.map((country) => ({
+      value: country,
+      label: formatCountryLabel(country),
+    })),
   ];
 
   return (

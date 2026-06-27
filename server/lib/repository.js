@@ -158,7 +158,7 @@ export async function getOverview(websiteId, userEmail, options = {}) {
           },
           referrer: event.referrer || "",
           timestamp: createdAt,
-          country: event.country,
+          country: event.country ?? null,
         },
       };
     }),

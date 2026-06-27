@@ -67,6 +67,21 @@
     return "Unknown";
   }
 
+  function getCountryHint() {
+    try {
+      var langs = navigator.languages || [navigator.language];
+      for (var i = 0; i < langs.length; i++) {
+        var parts = String(langs[i] || "").split("-");
+        if (parts.length >= 2 && parts[1].length === 2) {
+          return parts[1].toUpperCase();
+        }
+      }
+    } catch (err) {
+      // Ignore locale errors.
+    }
+    return null;
+  }
+
   function sendEvent(payload) {
     var body = JSON.stringify(payload);
     try {
@@ -121,6 +136,7 @@
       },
       referrer: document.referrer || "",
       timestamp: new Date().toISOString(),
+      country: getCountryHint(),
     },
   };
 

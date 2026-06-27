@@ -23,6 +23,7 @@ const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:${PORT}`;
 const TRACKER_APP_URL =
   process.env.TRACKER_APP_URL || `http://localhost:${PORT}`;
 
+app.set("trust proxy", true);
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: "8kb" }));
 app.use(express.static(join(__dirname, "../public")));
@@ -48,7 +49,9 @@ function buildTrackingScript(trackingId) {
   src="${tracker}/tracker.js"
   data-tracking-id="${trackingId}"
   data-endpoint="${base}/api/track"
-  async></script>`;
+  async
+  >
+  </script>`;
 }
 
 function formatWebsite(website) {

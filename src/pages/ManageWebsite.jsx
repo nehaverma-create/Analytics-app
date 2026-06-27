@@ -89,13 +89,13 @@ const ManageWebsites = () => {
           </div>
 
           <div className="manage-header-actions">
-            <button
+            <a
               type="button"
               className="back-link"
               onClick={() => navigate("/dashboard")}
             >
               ← Back to dashboard
-            </button>
+            </a>
 
             <button
               type="button"

@@ -3,6 +3,7 @@ import {
   insertEvents,
   upsertSession,
 } from "../lib/repository.js";
+import { resolveCountry } from "../lib/geoip.js";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -64,13 +65,15 @@ export async function handleTrackPost(req, res) {
       ? payload.device.device_type
       : "unknown";
 
+    const country = resolveCountry(req, payload?.country);
+
     await upsertSession({
       id: sessionId,
       websiteId: website.id,
       deviceType,
       browser: toString(payload?.device?.browser_name, 100) ?? "Unknown",
       os: toString(payload?.device?.os_name, 100) ?? "Unknown",
-      country: null,
+      country,
     });
 
     await insertEvents([
@@ -86,7 +89,7 @@ export async function handleTrackPost(req, res) {
         deviceType,
         browser: toString(payload?.device?.browser_name, 100) ?? "Unknown",
         os: toString(payload?.device?.os_name, 100) ?? "Unknown",
-        country: null,
+        country,
       },
     ]);
 

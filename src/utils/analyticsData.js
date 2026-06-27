@@ -5,6 +5,8 @@ function formatDate(date) {
   return `${year}-${month}-${day}`;
 }
 
+import { normalizeCountry } from "../../shared/country.js";
+
 export function getDefaultFilters() {
   const to = new Date();
   const from = new Date();
@@ -29,7 +31,7 @@ export function normalizeEvent(event) {
     deviceType: (payload.device?.device_type || "unknown").toLowerCase(),
     browser: payload.device?.browser_name || "Unknown",
     os: payload.device?.os_name || "Unknown",
-    country: (payload.country || "Unknown").toUpperCase(),
+    country: normalizeCountry(payload.country ?? payload.device?.country),
     pathname: payload.page?.pathname || payload.page?.url || "/",
     referrer: payload.referrer || "",
   };
@@ -57,7 +59,7 @@ export function filterEvents(events, filters) {
     }
     if (
       filters.country !== "all" &&
-      normalized.country.toLowerCase() !== filters.country.toLowerCase()
+      normalized.country?.toLowerCase() !== filters.country.toLowerCase()
     ) {
       return false;
     }
@@ -119,6 +121,7 @@ function countBy(events, getKey) {
 
   events.forEach((event) => {
     const key = getKey(normalizeEvent(event));
+    if (!key) return;
     counts[key] = (counts[key] || 0) + 1;
   });
 
@@ -207,9 +210,9 @@ export function getFilterOptions(events) {
 
   events.forEach((event) => {
     const normalized = normalizeEvent(event);
-    browsers.add(normalized.browser);
-    countries.add(normalized.country);
-    devices.add(normalized.deviceType);
+    if (normalized.browser) browsers.add(normalized.browser);
+    if (normalized.country) countries.add(normalized.country);
+    if (normalized.deviceType) devices.add(normalized.deviceType);
   });
 
   return {
