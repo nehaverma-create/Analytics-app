@@ -19,9 +19,9 @@ import { handleTrackOptions, handleTrackPost } from "./routes/track.js";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT || 3011;
-const API_BASE_URL = process.env.API_BASE_URL || `http://localhost:${PORT}`;
+const API_BASE_URL = process.env.API_BASE_URL 
 const TRACKER_APP_URL =
-  process.env.TRACKER_APP_URL || `http://localhost:${PORT}`;
+  process.env.TRACKER_APP_URL 
 
 app.set("trust proxy", true);
 app.use(cors({ origin: true, credentials: true }));
