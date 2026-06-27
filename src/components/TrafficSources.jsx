@@ -4,43 +4,39 @@ import {
   Pie,
   Cell,
   Tooltip,
-  
 } from "recharts";
+import ChartEmptyState from "./ChartEmptyState";
 
+const COLORS = ["#E84393", "#F5A000"];
 
+export default function TrafficSources({ data = [] }) {
+  const hasData = data.some((item) => item.value > 0);
 
-const trafficData = [
-  { name: "Direct", value: 44 },
-  { name: "Other", value: 56 },
-];
-
-const COLORS = ["#F5A000", "#E84393"];
-
-export default function TafficSources() {
   return (
-    <div className="chartCard">
-      <h3 className="chartTitle">Traffic Sources</h3>
+    <div className="chart-card">
+      <h3>Traffic Sources</h3>
 
-      <ResponsiveContainer width="100%" height={250}>
-        <PieChart>
-          <Pie
-            data={trafficData}
-            cx="50%"
-            cy="50%"
-            outerRadius={80}
-            dataKey="value"
-            label={({ name, value }) => `${name} ${value}%`}
-          >
-            {trafficData.map((entry, index) => (
-              <Cell
-                key={index}
-                fill={COLORS[index % COLORS.length]}
-              />
-            ))}
-          </Pie>
-          <Tooltip />
-        </PieChart>
-      </ResponsiveContainer>
+      {!hasData ? (
+        <ChartEmptyState message="No referrer data available" />
+      ) : (
+        <ResponsiveContainer width="100%" height={200}>
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              outerRadius={80}
+              dataKey="value"
+              label={({ name, value }) => `${name} ${value}%`}
+            >
+              {data.map((entry, index) => (
+                <Cell key={entry.name} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip />
+          </PieChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 }

@@ -1,55 +1,47 @@
 import {
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    ResponsiveContainer,
-    Tooltip,
-    CartesianGrid
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Tooltip,
+  CartesianGrid,
 } from "recharts";
+import ChartEmptyState from "./ChartEmptyState";
 
-const data = [
-    {
-        views: "/",
-        users: 9,
-    },
-];
+export default function TopPages({ data = [] }) {
+  const hasData = data.length > 0;
 
-export default function TopPages() {
-    return (
-        <div className="chart-card">
-            <h3>Top Pages</h3>
+  return (
+    <div className="chart-card">
+      <h3>Top Pages</h3>
 
-            <ResponsiveContainer width="100%" height={250}>
-                <BarChart
-                    data={data}
-                    layout="vertical"
-                >
-                    <CartesianGrid
-                        horizontal={false}
-                        vertical={true}
-                        stroke="#f2f4f7"
-                    />
-                    <XAxis type="number"
-                        axisLine={false}
-                        tickLine={false} 
-                    />
+      {!hasData ? (
+        <ChartEmptyState message="No page data available" />
+      ) : (
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={data} layout="vertical">
+            <CartesianGrid
+              horizontal={false}
+              vertical={true}
+              stroke="#f2f4f7"
+            />
 
-                    <YAxis
-                        type="category"
-                        dataKey="views"
-                        axisLine={false}
-                    />
+            <XAxis type="number" axisLine={false} tickLine={false} />
 
-                    <Tooltip />
+            <YAxis
+              type="category"
+              dataKey="views"
+              axisLine={false}
+              width={120}
+            />
 
-                    <Bar
-                        dataKey="users"
-                        fill="#8B5CF6"
-                        radius={[4, 4, 4, 4]}
-                    />
-                </BarChart>
-            </ResponsiveContainer>
-        </div>
-    );
+            <Tooltip />
+
+            <Bar dataKey="users" fill="#3b82f6" radius={[4, 4, 4, 4]} />
+          </BarChart>
+        </ResponsiveContainer>
+      )}
+    </div>
+  );
 }

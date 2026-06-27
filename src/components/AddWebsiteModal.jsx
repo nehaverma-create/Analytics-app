@@ -1,5 +1,6 @@
 import "./AddWebsiteModal.css";
 import { useState, useEffect } from "react";
+import { useAuthFetch } from "../hooks/useAuthFetch";
 
 export default function AddWebsiteModal({
   isOpen,
@@ -10,8 +11,15 @@ export default function AddWebsiteModal({
   const [websiteName, setWebsiteName] = useState("");
   const [domain, setDomain] = useState("");
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const authFetch = useAuthFetch();
 
   useEffect(() => {
+    if (!isOpen) return;
+
+    setError("");
+    setIsSubmitting(false);
+
     if (websiteData) {
       setWebsiteName(websiteData.websiteName || "");
       setDomain(websiteData.domain || "");
@@ -24,7 +32,7 @@ export default function AddWebsiteModal({
   const domainRegex =
     /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!domainRegex.test(domain)) {
@@ -34,16 +42,72 @@ export default function AddWebsiteModal({
 
     setError("");
 
-    onAddWebsite({
-      websiteName,
-      domain,
-       createdAt: new Date().toLocaleDateString(),
-       trackingScript: "Hello World",
-    });
+    if (websiteData) {
+      setIsSubmitting(true);
 
-    setWebsiteName("");
-    setDomain("");
-    onClose();
+      try {
+        const response = await authFetch(`/api/websites/${websiteData.id}`, {
+          method: "PUT",
+          body: JSON.stringify({ name: websiteName, domain }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to update website");
+        }
+
+        const data = await response.json();
+
+        onAddWebsite({
+          id: data.id,
+          websiteName: data.name,
+          domain: data.domain,
+          trackingId: data.trackingId,
+          trackingScript: data.trackingScript,
+          createdAt: new Date(data.createdAt).toLocaleDateString(),
+        });
+
+        setWebsiteName("");
+        setDomain("");
+        onClose();
+      } catch (err) {
+        setError(err.message || "Failed to update website. Please try again.");
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await authFetch("/api/websites", {
+        method: "POST",
+        body: JSON.stringify({ name: websiteName, domain }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create website");
+      }
+
+      const data = await response.json();
+
+      onAddWebsite({
+        id: data.id,
+        websiteName: data.name,
+        domain: data.domain,
+        trackingId: data.trackingId,
+        trackingScript: data.trackingScript,
+        createdAt: new Date(data.createdAt).toLocaleDateString(),
+      });
+
+      setWebsiteName("");
+      setDomain("");
+      onClose();
+    } catch (err) {
+      setError(err.message || "Failed to create website. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -85,8 +149,8 @@ export default function AddWebsiteModal({
               value={domain}
               placeholder="example.com"
               onChange={(e) => {
-                setError("")
-                setDomain(e.target.value)
+                setError("");
+                setDomain(e.target.value);
               }}
               required
             />
@@ -98,10 +162,15 @@ export default function AddWebsiteModal({
             <button
               type="submit"
               className="create-website-btn"
+              disabled={isSubmitting}
             >
-              {websiteData
-                ? "Save changes"
-                : "Create website"}
+              {isSubmitting
+                ? websiteData
+                  ? "Saving..."
+                  : "Creating..."
+                : websiteData
+                  ? "Save changes"
+                  : "Create website"}
             </button>
           </div>
         </form>

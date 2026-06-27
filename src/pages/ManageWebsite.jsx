@@ -8,11 +8,16 @@ import {
   updateWebsite,
   deleteWebsite,
 } from "../store/websitesSlice";
+import { useSyncWebsites } from "../hooks/useSyncWebsites";
+import { useAuthFetch } from "../hooks/useAuthFetch";
 
 const ManageWebsites = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const authFetch = useAuthFetch();
   const websites = useSelector((state) => state.websites.websites);
+
+  useSyncWebsites();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -22,7 +27,7 @@ const ManageWebsites = () => {
     if (editingId !== null) {
       dispatch(
         updateWebsite({
-          id: editingId,
+          id: websiteData.id ?? editingId,
           websiteName: websiteData.websiteName,
           domain: websiteData.domain,
         })
@@ -35,8 +40,24 @@ const ManageWebsites = () => {
     setIsModalOpen(false);
   };
 
-  const handleDeleteWebsite = (id) => {
-    dispatch(deleteWebsite(id));
+  const handleDeleteWebsite = async (id) => {
+    if (!window.confirm("Delete this website and all its analytics data?")) {
+      return;
+    }
+
+    try {
+      const response = await authFetch(`/api/websites/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete website");
+      }
+
+      dispatch(deleteWebsite(id));
+    } catch (err) {
+      alert(err.message || "Failed to delete website");
+    }
   };
 
   const handleEditWebsite = (id) => {
@@ -59,41 +80,48 @@ const ManageWebsites = () => {
       : null;
 
   return (
-    <div className="manage-container">
-      {/* HEADER */}
-      <div className="manage-header">
-        <div>
-          <h1 className="heading">Websites</h1>
-          <p>Manage websites and tracking scripts.</p>
-        </div>
-
-        <div className="header-right">
-          <div className="back-link" onClick={() => navigate("/dashboard")}>
-            ← Back to Dashboard
+    <div className="app-page">
+      <header className="app-header">
+        <div className="app-header-inner manage-header-content">
+          <div className="app-page-title">
+            <h1>Websites</h1>
+            <p>Manage websites and tracking scripts.</p>
           </div>
 
-          <button
-            className="add-btn"
-            onClick={() => {
-              setEditingId(null);
-              setIsModalOpen(true);
-            }}
-          >
-            Add Website
-          </button>
+          <div className="manage-header-actions">
+            <a
+              type="button"
+              className="back-link"
+              onClick={() => navigate("/dashboard")}
+            >
+              ← Back to dashboard
+            </a>
 
-          <UserButton />
+            <button
+              type="button"
+              className="add-btn"
+              onClick={() => {
+                setEditingId(null);
+                setIsModalOpen(true);
+              }}
+            >
+              Add website
+            </button>
+
+            <UserButton />
+          </div>
         </div>
-      </div>
+      </header>
 
-      {/* LIST */}
-      <div className="website-list">
-      
-        {websites.length === 0 ? (
-          <center>No websites added yet.</center>
-        ) : (
-          websites.map((site, index) => (
-            <div key={site.id} className="website-card">
+      <main className="app-main">
+        <div className="manage-website-list">
+          {websites.length === 0 ? (
+            <div className="dashboard-card empty-state-center">
+              <p className="empty-text">No websites added yet.</p>
+            </div>
+          ) : (
+            websites.map((site, index) => (
+              <div key={site.id} className="website-card">
               {/* TOP SECTION */}
               <div className="website-top">
                 <div className="website-info">
@@ -109,9 +137,7 @@ const ManageWebsites = () => {
                 <div className="website-actions">
                   <button
                     className="action-btn"
-                    onClick={() =>
-                      navigate(`/analytics/${site.websiteName}`)
-                    }
+                    onClick={() => navigate(`/analytics/${site.id}`)}
                   >
                     View Analytics
                   </button>
@@ -148,9 +174,10 @@ const ManageWebsites = () => {
                 <textarea readOnly value={site.trackingScript} />
               </div>
             </div>
-          ))
-        )}
-      </div>
+            ))
+          )}
+        </div>
+      </main>
 
       {/* MODAL */}
       <AddWebsiteModal

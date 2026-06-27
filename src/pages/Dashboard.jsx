@@ -1,32 +1,76 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { UserButton, useUser } from "@clerk/clerk-react";
 import { useDispatch, useSelector } from "react-redux";
 import AddWebsiteModal from "../components/AddWebsiteModal";
 import { useNavigate } from "react-router-dom";
 import { addWebsite } from "../store/websitesSlice";
+import { useSyncWebsites } from "../hooks/useSyncWebsites";
+import { useAuthFetch } from "../hooks/useAuthFetch";
 
 const Dashboard = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { user } = useUser();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const authFetch = useAuthFetch();
   const websites = useSelector((state) => state.websites.websites);
+
+  const [totals, setTotals] = useState({
+    totalVisitors: 0,
+    pageViews: 0,
+    sessions: 0,
+    activeUsers: 0,
+  });
+  const [loadingTotals, setLoadingTotals] = useState(true);
+
+  useSyncWebsites();
+
+  useEffect(() => {
+    const fetchTotals = async () => {
+      try {
+        const res = await authFetch(
+          "/api/analytics/summary?days=30&minutes=5"
+        );
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+        setTotals({
+          totalVisitors: data.totalVisitors ?? 0,
+          pageViews: data.pageViews ?? 0,
+          sessions: data.sessions ?? 0,
+          activeUsers: data.activeUsers ?? 0,
+        });
+      } catch (err) {
+        console.error("Failed to load dashboard totals:", err);
+      } finally {
+        setLoadingTotals(false);
+      }
+    };
+
+    fetchTotals();
+
+    const interval = setInterval(fetchTotals, 30000);
+    return () => clearInterval(interval);
+  }, [authFetch, websites.length]);
 
   const handleAddWebsite = (data) => {
     dispatch(addWebsite(data));
   };
 
+  const display = (value) => (loadingTotals ? "..." : value);
+
   return (
     <>
       <div className="dashboard-container">
-        {/* HEADER */}
-        <header className="dashboard-header">
-          <h1>Dashboard</h1>
-          <UserButton />
+        <header className="dashboard-header app-header">
+          <div className="app-header-inner">
+            <h1>Dashboard</h1>
+            <UserButton />
+          </div>
         </header>
 
         <main className="dashboard-content">
-          {/* WELCOME CARD */}
           <div className="dashboard-card welcome-card">
             <h2>Welcome, {user?.firstName || "User"}!</h2>
 
@@ -49,36 +93,34 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* ANALYTICS */}
           <div className="analytics-grid">
             <div className="dashboard-card ">
               <p>Total Visitors</p>
-              <h3 className="text">0</h3>
-              <p> Last 30 days</p>
+              <h3 className="text">{display(totals.totalVisitors)}</h3>
+              <p>Last 30 days</p>
             </div>
 
             <div className="dashboard-card ">
               <p>Page Views</p>
-              <h3 className="text-V">0</h3>
+              <h3 className="text-V">{display(totals.pageViews)}</h3>
               <p>Last 30 days</p>
             </div>
 
             <div className="dashboard-card ">
               <p>Sessions</p>
-              <h3 className="text-S">0</h3>
+              <h3 className="text-S">{display(totals.sessions)}</h3>
               <p>Last 30 days</p>
             </div>
 
             <div className="dashboard-card ">
               <p>Active Users</p>
-              <h3 className="text-A">0</h3>
+              <h3 className="text-A">{display(totals.activeUsers)}</h3>
               <p>Last 5 minutes</p>
             </div>
           </div>
 
-          {/* YOUR WEBSITES */}
           <div className="dashboard-card">
-            <h3>Your Websites</h3>
+            <h2>Your Websites</h2>
 
             <p className="sub-info-text">
               {websites.length
@@ -110,9 +152,7 @@ const Dashboard = () => {
 
                     <button
                       className="view-btn"
-                      onClick={() =>
-                       navigate(`/analytics/${web.id}`)
-                      }
+                      onClick={() => navigate(`/analytics/${web.id}`)}
                     >
                       View Analytics
                     </button>
@@ -124,7 +164,6 @@ const Dashboard = () => {
         </main>
       </div>
 
-      {/* MODAL */}
       <AddWebsiteModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

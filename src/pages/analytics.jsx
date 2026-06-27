@@ -1,6 +1,21 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useAuthFetch } from "../hooks/useAuthFetch";
+import { useSyncWebsites } from "../hooks/useSyncWebsites";
+import {
+  computeStats,
+  filterEvents,
+  getDefaultFilters,
+  getDeviceTypes,
+  getFilterOptions,
+  getOperatingSystems,
+  getTopBrowsers,
+  getTopCountries,
+  getTopPages,
+  getTrafficOverTime,
+  getTrafficSources,
+} from "../utils/analyticsData";
 
 import AnalyticsFilters from "../components/AnalyticsFilters";
 import TrafficChart from "../components/TrafficChart";
@@ -14,123 +29,182 @@ import TrafficSources from "../components/TrafficSources";
 const Analytics = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const authFetch = useAuthFetch();
+
+  useSyncWebsites();
 
   const websites = useSelector((state) => state.websites.websites);
+  const website = websites.find((w) => w.id === id || w.websiteName === id);
 
-  const website = websites.find((w) => w.id === id);
+  const [filters, setFilters] = useState(getDefaultFilters);
+  const [events, setEvents] = useState([]);
+  const [activeUsers, setActiveUsers] = useState(0);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!id) return;
+
+    const fetchAnalytics = async () => {
+      try {
+        const params = new URLSearchParams({
+          websiteId: id,
+          from: filters.fromDate,
+          to: filters.toDate,
+        });
+
+        const [overviewRes, activeRes] = await Promise.all([
+          authFetch(`/api/analytics/overview?${params}`),
+          authFetch(`/api/analytics/active?websiteId=${id}&minutes=5`),
+        ]);
+
+        if (!overviewRes.ok) {
+          throw new Error("Failed to fetch analytics overview");
+        }
+
+        const overview = await overviewRes.json();
+        const active = activeRes.ok
+          ? await activeRes.json()
+          : { activeUsers: 0 };
+
+        setEvents(overview.events || []);
+        setActiveUsers(active.activeUsers || 0);
+        setLastUpdated(new Date());
+      } catch (err) {
+        console.error("Error fetching analytics:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+
+    const interval = setInterval(fetchAnalytics, 30000);
+    return () => clearInterval(interval);
+  }, [id, authFetch, filters.fromDate, filters.toDate]);
+
+  const filteredEvents = useMemo(
+    () => filterEvents(events, filters),
+    [events, filters]
+  );
+
+  const stats = useMemo(
+    () => computeStats(filteredEvents),
+    [filteredEvents]
+  );
+
+  const filterOptions = useMemo(() => getFilterOptions(events), [events]);
+
+  const trafficData = useMemo(
+    () => getTrafficOverTime(filteredEvents, filters.granularity),
+    [filteredEvents, filters.granularity]
+  );
+
+  const deviceData = useMemo(
+    () => getDeviceTypes(filteredEvents),
+    [filteredEvents]
+  );
+
+  const browserData = useMemo(
+    () => getTopBrowsers(filteredEvents),
+    [filteredEvents]
+  );
+
+  const countryData = useMemo(
+    () => getTopCountries(filteredEvents),
+    [filteredEvents]
+  );
+
+  const osData = useMemo(
+    () => getOperatingSystems(filteredEvents),
+    [filteredEvents]
+  );
+
+  const pageData = useMemo(
+    () => getTopPages(filteredEvents),
+    [filteredEvents]
+  );
+
+  const sourceData = useMemo(
+    () => getTrafficSources(filteredEvents, website?.domain || ""),
+    [filteredEvents, website?.domain]
+  );
 
   if (!website) {
     return <h2>Website not found.</h2>;
   }
 
-  const trackingId = website.trackingId;
-
-  const [analytics, setAnalytics] = useState({
-    events: [],
-    totalVisitors: 0,
-    pageViews: 0,
-    sessions: 0,
-  });
-
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!trackingId) return;
-
-    setLoading(true);
-
-    fetch(`https://analytics.utkarsh.app/api/analytics/${trackingId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("API DATA:", data);
-
-        setAnalytics({
-          events: data.events || [],
-          totalVisitors: data.totalVisitors || 0,
-          pageViews: data.pageViews || 0,
-          sessions: data.sessions || 0,
-        });
-
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching analytics:", err);
-        setLoading(false);
-      });
-  }, [trackingId]);
-
   return (
-    <div>
-      {/* Header */}
-      <div className="analytics-header">
-        <div className="analytics-title">
-          <h2>Analytics</h2>
-          <p>Website: {website.websiteName}</p>
-        </div>
-
-        <div
-          className="analytics-link"
-          onClick={() => navigate("/manage-websites")}
-        >
-          ← Back to Website
-        </div>
-      </div>
-
-      <AnalyticsFilters />
-
-      {/* Stats */}
-      <div className="analytic-grid">
-        <div className="analytics-card stat-card">
-          <p>Total Visitors</p>
-          <h3>{loading ? "..." : analytics.totalVisitors}</h3>
-        </div>
-
-        <div className="analytics-card stat-card">
-          <p>Page Views</p>
-          <h3>{loading ? "..." : analytics.pageViews}</h3>
-        </div>
-
-        <div className="analytics-card stat-card">
-          <p>Sessions</p>
-          <h3>{loading ? "..." : analytics.sessions}</h3>
-        </div>
-
-        <div className="analytics-card stat-card">
-          <p>Active Users</p>
-          <h3>{loading ? "..." : 0}</h3>
-        </div>
-      </div>
-
-      {/* Charts */}
-      <div className="analytics-content">
-        <TrafficChart data={analytics.events} />
-
-        <div className="main">
-          <div className="chart">
-            <DeviceTypesChart data={analytics.events} />
+    <div className="app-page">
+      <header className="app-header">
+        <div className="app-header-inner">
+          <div className="app-page-title">
+            <h2>Analytics</h2>
+            <p>
+              {website.websiteName} · {website.domain || website.websiteName}
+            </p>
           </div>
 
-          <div className="chart">
-            <TopBrowsersChart data={analytics.events} />
+          <a
+            type="button"
+            className="app-back-link"
+            onClick={() => navigate("/manage-websites")}
+          >
+            ← Back to websites
+          </a>
+        </div>
+      </header>
+
+      <main className="app-main">
+        <AnalyticsFilters
+          filters={filters}
+          onChange={setFilters}
+          options={filterOptions}
+        />
+
+        <div className="analytic-grid">
+          <div className="analytics-card stat-card">
+            <p>Total visitors</p>
+            <h3>{loading ? "..." : stats.totalVisitors}</h3>
           </div>
 
-          <div className="chart">
-            <TopCountriesChart data={analytics.events} />
+          <div className="analytics-card stat-card">
+            <p>Page views</p>
+            <h3>{loading ? "..." : stats.pageViews}</h3>
           </div>
 
-          <div className="chart">
-            <OperatingSystemsChart data={analytics.events} />
+          <div className="analytics-card stat-card">
+            <p>Sessions</p>
+            <h3>{loading ? "..." : stats.sessions}</h3>
           </div>
 
-          <div className="chart">
-            <TopPages data={analytics.events} />
-          </div>
-
-          <div className="chart">
-            <TrafficSources data={analytics.events} />
+          <div className="analytics-card stat-card">
+            <div className="stat-card-header">
+              <p>Active users</p>
+              <span className="live-badge">Live</span>
+            </div>
+            <h3>{loading ? "..." : activeUsers}</h3>
+            {lastUpdated && (
+              <p className="stat-updated">
+                Updated {lastUpdated.toLocaleTimeString()}
+              </p>
+            )}
           </div>
         </div>
-      </div>
+
+        <div className="analytics-content">
+          <TrafficChart data={trafficData} />
+
+          <div className="analytics-chart-grids">
+            <DeviceTypesChart data={deviceData} />
+            <TopBrowsersChart data={browserData} />
+            <TopCountriesChart data={countryData} />
+            <OperatingSystemsChart data={osData} />
+            <TopPages data={pageData} />
+            <TrafficSources data={sourceData} />
+          </div>
+        </div>
+      </main>
     </div>
   );
 };

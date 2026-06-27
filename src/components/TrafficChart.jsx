@@ -1,4 +1,3 @@
-import React, { useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -7,58 +6,78 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  Legend,
 } from "recharts";
+import ChartEmptyState from "./ChartEmptyState";
+
+const formatDateLabel = (value) => {
+  const date = new Date(`${value}T00:00:00`);
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+};
 
 const TrafficChart = ({ data = [] }) => {
-  // Convert raw events → chart format
-  const chartData = useMemo(() => {
-    if (!Array.isArray(data)) return [];
-
-    const grouped = {};
-
-    data.forEach((event) => {
-      if (!event?.createdAt) return;
-
-      const date = new Date(event.createdAt)
-        .toISOString()
-        .split("T")[0];
-
-      if (!grouped[date]) {
-        grouped[date] = 0;
-      }
-
-      grouped[date] += 1;
-    });
-
-    return Object.keys(grouped)
-      .sort()
-      .map((date) => ({
-        date,
-        visits: grouped[date],
-      }));
-  }, [data]);
+  const hasData = data.length > 0;
 
   return (
-    <div style={{ width: "100%", height: 320 }}>
-      <ResponsiveContainer>
-        <LineChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" />
+    <div className="traffic-chart-card">
+      <h3 className="traffic-chart-title">Traffic over time</h3>
 
-          <XAxis dataKey="date" />
+      {!hasData ? (
+        <ChartEmptyState
+          title="No data for this range"
+          message="Adjust filters or wait for more traffic to appear."
+          height={200}
+        />
+      ) : (
+        <ResponsiveContainer width="100%" height={200}>
+          <LineChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f2f4f7" />
 
-          <YAxis />
+            <XAxis
+              dataKey="date"
+              tickFormatter={formatDateLabel}
+              axisLine={false}
+              tickLine={false}
+            />
 
-          <Tooltip />
+            <YAxis axisLine={false} tickLine={false} allowDecimals={false} />
 
-          <Line
-            type="monotone"
-            dataKey="visits"
-            stroke="#4F46E5"
-            strokeWidth={3}
-            dot={false}
-          />
-        </LineChart>
-      </ResponsiveContainer>
+            <Tooltip
+              labelFormatter={(label) => formatDateLabel(label)}
+              formatter={(value, name) => [value, name]}
+            />
+
+            <Legend verticalAlign="bottom" height={36} />
+
+            <Line
+              type="monotone"
+              dataKey="pageViews"
+              name="Page views"
+              stroke="#3b82f6"
+              strokeWidth={2}
+              dot={false}
+            />
+
+            <Line
+              type="monotone"
+              dataKey="visitors"
+              name="Visitors"
+              stroke="#14b8a6"
+              strokeWidth={2}
+              dot={false}
+            />
+
+            <Line
+              type="monotone"
+              dataKey="sessions"
+              name="Sessions"
+              stroke="#8b5cf6"
+              strokeWidth={2}
+              dot={false}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 };

@@ -1,4 +1,3 @@
-import React from "react";
 import { ChevronDown, Check } from "lucide-react";
 import * as SelectPrimitive from "@radix-ui/react-select";
 
@@ -9,9 +8,9 @@ const CustomSelect = ({ label, value, onValueChange, options }) => {
 
       <SelectPrimitive.Root value={value} onValueChange={onValueChange}>
         <SelectPrimitive.Trigger className="radix-select-trigger">
-          <SelectPrimitive.Value />
-          <SelectPrimitive.Icon>
-            <ChevronDown />
+          <SelectPrimitive.Value placeholder={`All ${label.toLowerCase()}`} />
+          <SelectPrimitive.Icon className="radix-select-icon">
+            <ChevronDown size={16} strokeWidth={2} />
           </SelectPrimitive.Icon>
         </SelectPrimitive.Trigger>
 
@@ -20,25 +19,23 @@ const CustomSelect = ({ label, value, onValueChange, options }) => {
             className="radix-select-content"
             position="popper"
             side="bottom"
-            align="center"
-            sideOffset={5}
+            align="start"
+            sideOffset={4}
           >
-            <SelectPrimitive.Viewport>
+            <SelectPrimitive.Viewport className="radix-select-viewport">
               {options.map((opt) => (
                 <SelectPrimitive.Item
                   key={opt.value}
                   value={opt.value}
                   className="radix-select-item"
                 >
-                  <div className="radix-select-item-content">
-                    <SelectPrimitive.ItemText>
-                      {opt.label}
-                    </SelectPrimitive.ItemText>
+                  <SelectPrimitive.ItemText className="radix-select-item-text">
+                    {opt.label}
+                  </SelectPrimitive.ItemText>
 
-                    <SelectPrimitive.ItemIndicator>
-                      <Check />
-                    </SelectPrimitive.ItemIndicator>
-                  </div>
+                  <SelectPrimitive.ItemIndicator className="radix-select-item-indicator">
+                    <Check size={14} strokeWidth={2.5} />
+                  </SelectPrimitive.ItemIndicator>
                 </SelectPrimitive.Item>
               ))}
             </SelectPrimitive.Viewport>
@@ -50,16 +47,3 @@ const CustomSelect = ({ label, value, onValueChange, options }) => {
 };
 
 export default CustomSelect;
-
-
-
-
-
-
-
-
-
-
-// when user select value: onvalueChange
-//viewport:scrollable area jha option dikhte hai
-//portal:dropdown ko body ke bhr render krta hai

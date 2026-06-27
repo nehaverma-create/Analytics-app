@@ -43,7 +43,7 @@ const GetStarted = ({ variant = "button", isShowProfile = false }) => {
             </div>
 
             {/* Clerk default modal includes signOut */}
-            {isShowProfile && <UserButton />}
+            {isShowProfile && <UserButton  />}
           </div>
         ) : (
           <button
