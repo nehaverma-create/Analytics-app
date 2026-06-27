@@ -3,12 +3,12 @@ import { createSlice } from "@reduxjs/toolkit";
 const APP_URL =
   import.meta.env.VITE_APP_URL ||
   (import.meta.env.DEV
-    ? "http://localhost:5173"
+    ? "https://analytics-app-otm0.onrender.com"
     : "https://analytics-app-kappa.vercel.app");
 
 const API_BASE =
   import.meta.env.VITE_API_URL ||
-  (import.meta.env.DEV ? "http://localhost:3011" : APP_URL);
+  (import.meta.env.DEV ? "https://analytics-app-otm0.onrender.com" : APP_URL);
 
 const buildTrackingScript = (trackingId) =>
   `<script
