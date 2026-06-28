@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { useAuth } from "@clerk/clerk-react";
+import { apiUrl } from "../config/api";
 
 export function useAuthFetch() {
   const { getToken } = useAuth();
@@ -17,7 +18,7 @@ export function useAuthFetch() {
         headers.set("Content-Type", "application/json");
       }
 
-      return fetch(url, { ...options, headers });
+      return fetch(apiUrl(url), { ...options, headers });
     },
     [getToken]
   );
