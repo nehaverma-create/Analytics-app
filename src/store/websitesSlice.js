@@ -1,20 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
-
-const APP_URL =
-  import.meta.env.VITE_APP_URL ||
-  (import.meta.env.DEV
-    ? "https://analytics-app-otm0.onrender.com"
-    : "https://analytics-app-kappa.vercel.app");
-
-const API_BASE =
-  import.meta.env.VITE_API_URL ||
-  (import.meta.env.DEV ? "https://analytics-app-otm0.onrender.com" : APP_URL);
+import { API_BASE, APP_BASE } from "../config/api";
 
 const buildTrackingScript = (trackingId) =>
   `<script
-  src="${APP_URL.replace(/\/$/, "")}/tracker.js"
+  src="${APP_BASE}/tracker.js"
   data-tracking-id="${trackingId}"
-  data-endpoint="${API_BASE.replace(/\/$/, "")}/api/track"
+  data-endpoint="${API_BASE || APP_BASE}/api/track"
   async
   >
   </script>`;
