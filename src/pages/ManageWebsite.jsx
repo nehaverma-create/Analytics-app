@@ -171,7 +171,11 @@ const ManageWebsites = () => {
                   </button>
                 </div>
 
-                <textarea readOnly value={site.trackingScript} />
+                <textarea
+                  readOnly
+                  value={site.trackingScript}
+                  rows={site.trackingScript.split("\n").length}
+                />
               </div>
             </div>
             ))
