@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import ManageWebsites from "./pages/ManageWebsite";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
@@ -27,12 +27,16 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      <Route path="/analytics/:id" element={         
-         <ProtectedRoute>
-<Analytics />
- </ProtectedRoute>} />
+      <Route
+        path="/analytics/:id"
+        element={
+          <ProtectedRoute>
+            <Analytics />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
-  
   );
 }
 
